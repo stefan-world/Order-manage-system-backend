@@ -18,6 +18,7 @@ require("dotenv").config({ path: ".variables.env" });
 
 // create our Express app
 const app = express();
+app.use(cors());
 
 // serves up static files from the public folder. Anything in public/ will just be served up as the file it is
 app.use(express.static(path.join(__dirname, "public")));
@@ -26,7 +27,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cors());
 
 // Sessions allow us to Contact data on visitors from request to request
 // This keeps admins logged in and allows us to send flash messages

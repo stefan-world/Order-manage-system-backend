@@ -27,18 +27,25 @@ const storage2 = multer.diskStorage({
 });
 var upload2 = multer({storage:storage2});
 
-const Accounts =require("../controllers/authController");
+const Users =require("../controllers/authController");
 const Suppliers =require("../controllers/suppliersController");
 const Reports =require("../controllers/reportsController");
 const Products =require("../controllers/productsController");
 const Orders = require("../controllers/ordersController");
+const Accounts = require("../controllers/accountsController")
 
 // --------------- accounts router -------------------
 
 router.route("/accounts/list").post(catchErrors(Accounts.list));
 router.route("/accounts/delete/:id").post(catchErrors(Accounts.delete));
-router.route("/accounts/edit/:id").post(catchErrors(Accounts.edit));
+router.route("/accounts/edit/:id").get(catchErrors(Accounts.edit));
 router.route("/accounts/update").post(catchErrors(Accounts.update));
+router.route("/accounts/create").post(catchErrors(Accounts.create));
+
+router.route("/users/list").post(catchErrors(Users.list));
+router.route("/users/delete/:id").post(catchErrors(Users.delete));
+router.route("/users/edit/:id").get(catchErrors(Users.edit));
+router.route("/users/update").post(catchErrors(Users.update));
 
 // --------------- suppliers router -------------------
 
@@ -55,13 +62,14 @@ router.route("/reports/partnerlist").get(catchErrors(Reports.partnerlist));
 router.route("/reports/unpaidList").get(catchErrors(Reports.unpaidList));
 
 // --------------- products router -------------------
-router.route("/products/list/:id").get(catchErrors(Products.list));
+router.route("/product/list/:id").get(catchErrors(Products.list));
 router.route("/product/create").post(upload1.single('image'), catchErrors(Products.create));
 router.route("/product/create/noimage").post(catchErrors(Products.createnoimage));
-router.route("/products/delete/:id").get(catchErrors(Products.delete));
+router.route("/product/delete/:id").get(catchErrors(Products.delete));
 router.route("/product/edit").post(catchErrors(Products.edit));
 router.route("/product/update").post(upload1.single('image'), catchErrors(Products.update));
 router.route("/product/update/noimage").post(catchErrors(Products.updatenoimage));
+router.route("/product/importcsv").post(catchErrors(Products.importcsv));
 
 router.route("/ordersList/create").post(catchErrors(Orders.create));
 router.route("/ordersList/updateState").post(catchErrors(Orders.updateState));

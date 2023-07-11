@@ -8,14 +8,17 @@ require("dotenv").config({ path: ".variables.env" });
 exports.create = async (req, res) => {
   try {
 
-    let { name, mobile, email, phone, country, state, city, postcode, address, account_id } = req.body;
+    let { name, mobile, email, phone, country, state, city, postcode, address, user_id } = req.body;
 
     const allSuppliers = await Suppliers.find();
     const number = allSuppliers.length + 1;
     const altnum = number;
-    const user = await Users.findOne({ _id: account_id });
+    const user = await Users.findOne({ _id: user_id });
+    let account_id;
     if (user.role == "admin") {
-      account_id = "general_supplier";
+      account_id = "general_user";
+    } else {
+      account_id = user.account_id;
     }
 
     const newSuppliers = new Suppliers({
@@ -49,15 +52,15 @@ exports.create = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
-    const account_id = req.params.id;
-    const user = await Users.findOne({ _id: account_id });
+    const id = req.params.id;
+    const user = await Users.findOne({ _id: id });
     if (user.role == "admin")
       var suppliers_temp = await Suppliers.find();
     else
       var suppliers_temp = await Suppliers.find({
         $or: [
-          { account_id: account_id },
-          { account_id: "general_supplier" }
+          { account_id: user.account_id },
+          { account_id: "general_user" }
         ]
       });
     const suppliers = suppliers_temp;
@@ -80,10 +83,10 @@ exports.list = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const id = req.params.id;
-    const number = await Suppliers.findOne({ _id: id });
+    const supplier = await Suppliers.findOne({ _id: id });
     const suppliers = await Suppliers.find();
 
-    const i = number.number;
+    const i = supplier.number;
 
     const result = await Suppliers.findOneAndDelete({ _id: id });
 

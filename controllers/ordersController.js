@@ -1,17 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const product = require('../models/product');
 const Orders = mongoose.model('Orders');
 const Products = mongoose.model("Products");
 const Suppliers = mongoose.model("Suppliers");
 const Users = mongoose.model("Users");
+const Accounts = mongoose.model("Accounts");
 
 require('dotenv').config({ path: ".variables.env" });
 
 exports.create = async (req, res) => {
     try {
-        let { products_id, products_quantity, status, account_id } = req.body;
+        let { products_id, products_quantity, status, user_id } = req.body;
         // let file_path = process.env.BASEURL + process.env.PORT + "/uploads/Orders/" + req.file.filename; 
+        const user = await Users.findOne({ _id: user_id })
         const allOrders = await Orders.find();
         const number = allOrders.length + 1;
         const altnum = number;
@@ -33,7 +34,7 @@ exports.create = async (req, res) => {
             // file: file_path,
             status,
             supplier_id: product1.supplier_id,
-            account_id,
+            account_id: user.account_id,
         });
 
         const saveOrder = await newOrder.save();
@@ -51,9 +52,8 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
     try {
-        let { order_id, products_id, products_quantity, status, account_id } = req.body;
+        let { order_id, products_id, products_quantity, account_id } = req.body;
         // let file_path = process.env.BASEURL + process.env.PORT + "/uploads/Orders/" + req.file.filename; 
-        console.log(req.body)
         const product1 = await Products.findOne({ _id: products_id[0] });
         const products = await Promise.all(products_id.map(async (productId) => {
             const product = await Products.findOne({ _id: productId });
@@ -70,7 +70,6 @@ exports.update = async (req, res) => {
                 products_id,
                 products_quantity,
                 // file: file_path,
-                status,
                 supplier_id: product1.supplier_id,
                 account_id,
             },
@@ -109,12 +108,14 @@ exports.updateState = async (req, res) => {
 
 exports.list = async (req, res) => {
     try {
-        const account_id = req.params.id;
-        const user = await Users.findOne({ _id: account_id });
-        if (user.role == "admin")
+        const user_id = req.params.id;
+        const user = await Users.findOne({ _id: user_id });
+        if (user.role == "admin") {
             var orders_temp = await Orders.find();
-        else
-            var orders_temp = await Orders.find({ account_id: account_id });
+        }
+        else {
+            var orders_temp = await Orders.find({ account_id: user.account_id });
+        }
         const orders = orders_temp;
         if (!orders)
             return res.status(400).json({
@@ -123,6 +124,12 @@ exports.list = async (req, res) => {
 
         const newOrders = await Promise.all(orders.map(async (order) => {
             const supplier = await Suppliers.findOne({ _id: order.supplier_id });
+            if (order.account_id == "general_user")
+                var account_name = "Super Admin"
+            else {
+                var account = await Accounts.findOne({ _id: order.account_id });
+                var account_name = account.account_name
+            }
             return {
                 _id: order._id,
                 number: order.number,
@@ -130,7 +137,7 @@ exports.list = async (req, res) => {
                 status: order.status,
                 supplier: supplier.name,
                 supplier_id: order.supplier_id,
-                account: user.username,
+                account: account_name,
                 quantity: order.products_quantity,
                 updatedAt: order.updatedAt
             }
@@ -141,6 +148,7 @@ exports.list = async (req, res) => {
         });
 
     } catch (err) {
+        console.log(err)
         res.status(500).json({ message: err.message });
     }
 };
@@ -181,14 +189,20 @@ exports.delete = async (req, res) => {
         const newOrders_temp = await Orders.find();
         const newOrders = await Promise.all(newOrders_temp.map(async (order) => {
             const supplier = await Suppliers.findOne({ _id: order.supplier_id });
-            const user = await Users.findOne({ _id: order.account_id });
+            if (order.account_id == "general_user")
+                var account_name = "Super Admin"
+            else {
+                var account = await Accounts.findOne({ _id: order.account_id });
+                var account_name = account.account_name
+            }
             return {
                 _id: order._id,
                 number: order.number,
                 products_id: order.products_id,
                 status: order.status,
                 supplier: supplier.name,
-                account: user.username,
+                supplier_id: order.supplier_id,
+                account: account_name,
                 quantity: order.products_quantity,
                 updatedAt: order.updatedAt
             }

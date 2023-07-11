@@ -24,12 +24,14 @@ const admin = {
   role: 'admin',
   phone: '+1234567890',
   address: 'Australia',
+  status: 'active',
+  account_id: 'general_user'
 };
 
 ////////////////////////////   initialing first by admin ///////////
 const init = async (initialAdmin) => {
 
-  let { email, avatar, password, username, role, address, phone, number, altnum } = initialAdmin;
+  let { email, avatar, password, username, role, address, phone, number, altnum, status, account_id } = initialAdmin;
 
   const existingAdmin = await Users.findOne({ role: role });
   if (existingAdmin)
@@ -47,6 +49,8 @@ const init = async (initialAdmin) => {
     role,
     address,
     phone,
+    status,
+    account_id
   });
 
   const savedAdmin = await newAdmin.save();

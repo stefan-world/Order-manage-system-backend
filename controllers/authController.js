@@ -9,8 +9,9 @@ require("dotenv").config({ path: ".variables.env" });
 exports.register = async (req, res) => {
 
   try {
-    let { username, email, password, phone, address, role } = req.body;
-    if (!email || !password || !username || !phone || !address)
+    let { username, email, password, phone, address, role, status, account_id } = req.body;
+
+    if (!email || !password || !username || !phone || !address || !account_id)
       return res.status(400).json({ message: "Not all fields have been entered." });
     if (password.length < 5)
       return res
@@ -23,6 +24,8 @@ exports.register = async (req, res) => {
       return res
         .status(200)
         .json({ success: false, message: "An user with this email already exists." });
+
+    console.log(existingUser);
 
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
@@ -39,7 +42,9 @@ exports.register = async (req, res) => {
       password: passwordHash,
       phone,
       address,
-      role
+      role,
+      status,
+      account_id
     });
 
     const savedUser = await newUser.save();
@@ -50,6 +55,7 @@ exports.register = async (req, res) => {
       message: "Registered successfully! Please check your accounts list!"
     });
   } catch (err) {
+    console.log(err)
     res.status(500).json({
       success: false,
       message: err.message,
@@ -137,7 +143,7 @@ exports.list = async (req, res) => {
       });
 
     return res.status(200).json({
-      accounts: users,
+      users: users,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -183,7 +189,7 @@ exports.delete = async (req, res) => {
     const newusers = await Users.find().exec();
 
     return res.status(200).json({
-      accounts: newusers
+      users: newusers
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -199,7 +205,7 @@ exports.edit = async (req, res) => {
         message: "No partner has been registered."
       });
     return res.status(200).json({
-      account: user
+      user: user
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -209,7 +215,7 @@ exports.edit = async (req, res) => {
 exports.update = async (req, res) => {
 
   try {
-    let { id, username, email, password, phone, role, address } = req.body;
+    let { id, username, email, password, phone, role, address, status, account_id } = req.body;
     if (!id || !email || !username || !address)
       return res.status(400).json({ message: "Not all fields have been entered." });
     if (password!="")
@@ -231,6 +237,8 @@ exports.update = async (req, res) => {
           password: passwordHash,
           role,
           phone,
+          status,
+          account_id
         },
         {
           new: true
@@ -248,7 +256,9 @@ exports.update = async (req, res) => {
           email,
           password: user.password,
           phone,
-          role
+          role,
+          status,
+          account_id
         },
         {
           new: true

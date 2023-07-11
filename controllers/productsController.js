@@ -10,7 +10,8 @@ require("dotenv").config({ path: ".variables.env" });
 
 exports.create = async (req, res) => {
   try {
-    let { name, description, price, barcode, status, supplier, quantity } = req.headers;
+    let { name, description, price, barcode, status, supplier, quantity, brand, category, subcategory,
+      purchase, available, tax, weighable, showInOnline, } = req.headers;
     let avatar = process.env.BASEURL + process.env.PORT + "/uploads/products/" + req.file.filename;
     let origin = req.file.filename;
     const allProducts = await Products.find();
@@ -28,7 +29,15 @@ exports.create = async (req, res) => {
       barcode,
       quantity,
       status,
-      supplier_id: supplier
+      supplier_id: supplier,
+      brand,
+      category,
+      subcategory,
+      purchase,
+      available,
+      tax,
+      weighable,
+      showInOnline,
     });
 
     const saveProduct = await newProduct.save();
@@ -49,7 +58,8 @@ exports.createnoimage = async (req, res) => {
 
   try {
 
-    let { name, description, price, barcode, quantity, status, supplier } = req.body;
+    let { name, description, price, barcode, quantity, status, supplier,brand, category, subcategory,
+      purchase, available, tax, weighable, showInOnline, } = req.body;
 
     const allProducts = await Products.find();
     const number = allProducts.length + 1;
@@ -64,7 +74,15 @@ exports.createnoimage = async (req, res) => {
       barcode,
       quantity,
       status,
-      supplier_id: supplier
+      supplier_id: supplier,
+      brand,
+      category,
+      subcategory,
+      purchase,
+      available,
+      tax,
+      weighable,
+      showInOnline,
     });
 
     const saveProduct = await newProduct.save();
@@ -73,6 +91,56 @@ exports.createnoimage = async (req, res) => {
       message: "successfully updated!"
     });
   } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.importcsv = async (req, res) => {
+  try {
+
+    // let { name, description, price, barcode, quantity, status, supplier } = req.body;
+
+    let supplier = req.body.supplier_id;
+    let data = req.body.products_list;
+
+    const allProducts = await Products.find();
+    var number = allProducts.length;
+    var altnum = number;
+
+    const products = data.map((product) => {
+      number = altnum+1;
+      altnum = number;
+      return newProduct = new Products({
+        number,
+        altnum,
+        name: product[0],
+        brand: product[1],
+        category: product[2],
+        subcategory: product[3],
+        barcode: product[4],
+        purchase: product[5],
+        available: product[6],
+        price: product[7],
+        tax: product[8],
+        weighable: product[9],
+        showInOnline: product[10],
+        supplier_id: supplier
+      })
+    })
+    
+    for (const product of products) {
+      await product.save();
+    }
+
+    return res.status(200).json({
+      message: "successfully updated!"
+    });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({
       success: false,
       message: err.message,
@@ -82,12 +150,12 @@ exports.createnoimage = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
-    const account_id = req.params.id;
-    const account = await Users.findOne({_id: account_id});
+    const user_id = req.params.id;
+    const user = await Users.findOne({_id: user_id});
     const products = await Products.find();
     const filtered_products = await Promise.all(products.map(async (product) => {
       const supplier = await Suppliers.findOne({ _id: product.supplier_id });
-      return account.role=="admin" || account_id==supplier.account_id || supplier.account_id=="general_supplier" ? product : null ;
+      return user.role=="admin" || user.account_id==supplier.account_id || supplier.account_id=="general_user" ? product : null ;
     }));
 
     const actual_products = filtered_products.filter(product => product !== null);
@@ -109,12 +177,12 @@ exports.delete = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const number = await Products.findOne({ _id: id });
+    const product = await Products.findOne({ _id: id });
     const products = await Products.find();
 
-    const i = number.number;
+    const i = product.number;
 
-    var direct = 'public/uploads/products/' + number.origin;
+    var direct = 'public/uploads/products/' + product.origin;
 
     fs.unlink(direct, (err) => {
       if (err) {
@@ -155,6 +223,7 @@ exports.delete = async (req, res) => {
       products: newProducts
     });
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message });
   }
 };

@@ -20,6 +20,30 @@ const productsSchema = new mongoose.Schema({
   origin: {
     type: String,
   },
+  brand: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
+  subcategory: {
+    type: String,
+  },
+  purchase: {
+    type: String,
+  },
+  available: {
+    type: String,
+  },
+  tax: {
+    type: String,
+  },
+  weighable: {
+    type: String,
+  },
+  showInOnline: {
+    type: String,
+  },
   description: {
     type: String,
     default:""

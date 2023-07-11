@@ -34,6 +34,14 @@ const usersSchema = new Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    default: 'active',
+  },
+  account_id: {
+    type: String,
+    required: true
+  },
   updatedAt: {
     type: Date,
     default: Date.now,
