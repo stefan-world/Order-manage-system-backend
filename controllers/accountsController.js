@@ -29,7 +29,6 @@ exports.create = async (req, res) => {
       message: "successfully created! Please check your accounts list!"
     });
   } catch (err) {
-    console.log(err)
     res.status(500).json({
       success: false,
       message: err.message,

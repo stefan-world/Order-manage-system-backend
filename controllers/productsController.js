@@ -137,7 +137,7 @@ exports.importcsv = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "successfully updated!"
+      message: "Imported csv file successfully!"
     });
   } catch (err) {
     console.log(err);
@@ -155,7 +155,7 @@ exports.list = async (req, res) => {
     const products = await Products.find();
     const filtered_products = await Promise.all(products.map(async (product) => {
       const supplier = await Suppliers.findOne({ _id: product.supplier_id });
-      return user.role=="admin" || user.account_id==supplier.account_id || supplier.account_id=="general_user" ? product : null ;
+      return user.role=="super_admin" || user.account_id==supplier.account_id || supplier.account_id=="general_user" ? product : null ;
     }));
 
     const actual_products = filtered_products.filter(product => product !== null);
@@ -168,6 +168,7 @@ exports.list = async (req, res) => {
     });
 
   } catch (err) {
+    console.log(err)
     res.status(500).json({ message: err.message });
   }
 };

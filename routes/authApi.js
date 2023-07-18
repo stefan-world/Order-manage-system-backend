@@ -21,7 +21,7 @@ const admin = {
   email: 'admin@demo.com',
   username: 'Raju Vama',
   password: 'admin',
-  role: 'admin',
+  role: 'super_admin',
   phone: '+1234567890',
   address: 'Australia',
   status: 'active',

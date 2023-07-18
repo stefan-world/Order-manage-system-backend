@@ -83,7 +83,6 @@ exports.update = async (req, res) => {
             message: "Successfully updated! Please check your Orders list!"
         });
     } catch (err) {
-        console.log(err)
         res.status(500).json({
             success: false,
             message: err.message,
@@ -110,7 +109,7 @@ exports.list = async (req, res) => {
     try {
         const user_id = req.params.id;
         const user = await Users.findOne({ _id: user_id });
-        if (user.role == "admin") {
+        if (user.role == "super_admin") {
             var orders_temp = await Orders.find();
         }
         else {

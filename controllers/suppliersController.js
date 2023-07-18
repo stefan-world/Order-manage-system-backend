@@ -15,7 +15,7 @@ exports.create = async (req, res) => {
     const altnum = number;
     const user = await Users.findOne({ _id: user_id });
     let account_id;
-    if (user.role == "admin") {
+    if (user.role == "super_admin") {
       account_id = "general_user";
     } else {
       account_id = user.account_id;
@@ -54,7 +54,7 @@ exports.list = async (req, res) => {
   try {
     const id = req.params.id;
     const user = await Users.findOne({ _id: id });
-    if (user.role == "admin")
+    if (user.role == "super_admin")
       var suppliers_temp = await Suppliers.find();
     else
       var suppliers_temp = await Suppliers.find({

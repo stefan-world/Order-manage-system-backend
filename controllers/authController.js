@@ -25,8 +25,6 @@ exports.register = async (req, res) => {
         .status(200)
         .json({ success: false, message: "An user with this email already exists." });
 
-    console.log(existingUser);
-
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
 
@@ -55,7 +53,6 @@ exports.register = async (req, res) => {
       message: "Registered successfully! Please check your accounts list!"
     });
   } catch (err) {
-    console.log(err)
     res.status(500).json({
       success: false,
       message: err.message,
@@ -135,7 +132,13 @@ exports.isValidToken = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
-    const users = await Users.find();
+    const {user_id} = req.body
+    const user = await Users.findOne({_id: user_id});
+    
+    if(user.role==='super_admin')
+      var users = await Users.find();
+    else
+      var users = await Users.find({account_id: user.account_id} )
 
     if (!users)
       return res.status(400).json({
