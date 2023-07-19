@@ -54,7 +54,7 @@ const accountsSchema = new mongoose.Schema({
     type: String,
     required:true
   },
-  company_eamil: {
+  company_email: {
     type: String,
     required:true
   },
